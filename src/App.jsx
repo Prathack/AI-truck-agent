@@ -29,7 +29,7 @@ const App = () => {
         // OR we can actually fetch from 8000. The prompt says:
         // "make sure that when the backend is not running it will show not a single result and when the backend is run make sure that it shows the full camparsion of 25 website prices"
         // Let's actually fetch from localhost:8000.
-        const res = await fetch('https://ai-agent-backend.onrender.com/health', { signal: AbortSignal.timeout(10000) });
+        fetch('https://ai-agent-backend.onrender.com/health', {signal: AbortSignal.timeout(15000)});
         if (res.ok) setBackendStatus('online');
         else setBackendStatus('offline');
       } catch (err) {
@@ -97,7 +97,7 @@ const App = () => {
 
     l.push({ id: id++, timestamp: time.toLocaleTimeString('en-US', {hour12: false}), level: 'info', message: 'FleetSight orchestration engine started.' });
     time.setSeconds(time.getSeconds() + 1);
-    l.push({ id: id++, timestamp: time.toLocaleTimeString('en-US', {hour12: false}), level: 'success', message: 'API handshake established (Port: 8000).' });
+    l.push({ id: id++, timestamp: time.toLocaleTimeString('en-US', {hour12: false}), level: 'success', message: 'API handshake established (Port: 10000).' });
     
     [...allProviders].reverse().forEach(p => {
       time.setSeconds(time.getSeconds() + Math.floor(Math.random() * 3));

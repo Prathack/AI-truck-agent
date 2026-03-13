@@ -14,7 +14,11 @@ import { Search, Loader2 } from 'lucide-react';
 
 const App = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
-  const apiUrl = (path) => (API_BASE_URL ? `${API_BASE_URL}${path}` : path);
+  console.log(API_BASE_URL)
+  const apiUrl = (path) => {
+      if (!API_BASE_URL) console.error("VITE_API_BASE_URL is not set!");
+      return `${API_BASE_URL}${path}`;
+  };
 
   const [activeTab, setActiveTab] = useState('overview');
   const [isSearching, setIsSearching] = useState(false);

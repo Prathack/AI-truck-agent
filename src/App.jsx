@@ -29,7 +29,7 @@ const App = () => {
         // OR we can actually fetch from 8000. The prompt says:
         // "make sure that when the backend is not running it will show not a single result and when the backend is run make sure that it shows the full camparsion of 25 website prices"
         // Let's actually fetch from localhost:8000.
-        const res = await fetch('http://localhost:8000/health', { signal: AbortSignal.timeout(2000) });
+        const res = await fetch('https://ai-agent-backend.onrender.com/health', { signal: AbortSignal.timeout(10000) });
         if (res.ok) setBackendStatus('online');
         else setBackendStatus('offline');
       } catch (err) {

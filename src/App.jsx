@@ -20,26 +20,29 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   
-  useEffect(() => {
-    // Simulate backend connection check
-    const checkBackend = async () => {
-      try {
-        // Attempt to connect to local backend (8000)
-        // For development/demo, we'll wait a bit and pretend it connects if no real backend exists, 
-        // OR we can actually fetch from 8000. The prompt says:
-        // "make sure that when the backend is not running it will show not a single result and when the backend is run make sure that it shows the full camparsion of 25 website prices"
-        // Let's actually fetch from localhost:8000.
-        fetch('https://ai-agent-backend.onrender.com/health', {signal: AbortSignal.timeout(15000)});
-        if (res.ok) setBackendStatus('online');
-        else setBackendStatus('offline');
-      } catch (err) {
-        setBackendStatus('offline');
+useEffect(() => {
+  const checkBackend = async () => {
+    try {
+      const res = await fetch(
+        "https://ai-agent-backend.onrender.com/health",
+        { signal: AbortSignal.timeout(15000) }
+      );
+
+      if (res.ok) {
+        setBackendStatus("online");
+      } else {
+        setBackendStatus("offline");
       }
-    };
-    checkBackend();
-    const interval = setInterval(checkBackend, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    } catch (err) {
+      setBackendStatus("offline");
+    }
+  };
+
+  checkBackend();
+  const interval = setInterval(checkBackend, 5000);
+
+  return () => clearInterval(interval);
+}, []);
 
   const generateMockProviders = () => {
     const baseProviders = [

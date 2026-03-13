@@ -4,6 +4,9 @@ import { Truck, ShieldCheck, Zap, ArrowRight, BrainCircuit, Globe } from 'lucide
 import ParticleBackground from './ParticleBackground';
 
 const LandingPage = ({ onLogin }) => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+  const apiUrl = (path) => (API_BASE_URL ? `${API_BASE_URL}${path}` : path);
+
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,7 +22,7 @@ const LandingPage = ({ onLogin }) => {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:8000/api/auth', {
+      const res = await fetch(apiUrl('/api/auth'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

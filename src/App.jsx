@@ -13,6 +13,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2 } from 'lucide-react';
 
 const App = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+  const apiUrl = (path) => (API_BASE_URL ? `${API_BASE_URL}${path}` : path);
+
   const [activeTab, setActiveTab] = useState('overview');
   const [isSearching, setIsSearching] = useState(false);
   const [toasts, setToasts] = useState([]);
@@ -23,10 +26,7 @@ const App = () => {
 useEffect(() => {
   const checkBackend = async () => {
     try {
-      const res = await fetch(
-        "https://ai-agent-backend.onrender.com/health",
-        { signal: AbortSignal.timeout(15000) }
-      );
+      const res = await fetch(apiUrl("/health"));
 
       if (res.ok) {
         setBackendStatus("online");
@@ -34,12 +34,13 @@ useEffect(() => {
         setBackendStatus("offline");
       }
     } catch (err) {
+      console.error("Backend error:", err);
       setBackendStatus("offline");
     }
   };
 
   checkBackend();
-  const interval = setInterval(checkBackend, 5000);
+  const interval = setInterval(checkBackend, 10000);
 
   return () => clearInterval(interval);
 }, []);
@@ -137,31 +138,72 @@ useEffect(() => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+  try {
     setIsSearching(true);
-    addToast('info', 'Scanning provider database for Chicago to Detroit route...');
-    
-    setTimeout(() => {
-      setIsSearching(false);
-      addToast('success', 'Search completed. 18 providers found with optimal pricing.');
-    }, 3000);
-  };
 
-  const handleLogin = (email) => {
-    setUserEmail(email);
-    setIsAuthenticated(true);
-    addToast('success', `Authentication successful. Welcome, ${email}.`);
-  };
+    const response = await fetch(
+      apiUrl("/api/search"),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pickup_location: "Chicago",
+          dropoff_location: "Detroit",
+          pickup_date: "2026-03-20"
+        }),
+      }
+    );
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUserEmail('');
-    setActiveTab('overview');
-  };
+    const data = await response.json();
 
-  if (!isAuthenticated) {
-    return <LandingPage onLogin={handleLogin} />;
+    console.log("Job ID:", data.job_id);
+
+    addToast("success", "Search started. Job ID: " + data.job_id);
+
+  } catch (error) {
+    console.error(error);
+    addToast("error", "Backend request failed");
   }
+
+  setIsSearching(false);
+};
+
+const handleLogin = async (email) => {
+  try {
+
+    const res = await fetch(
+      apiUrl("/api/auth"),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      setUserEmail(email);
+      setIsAuthenticated(true);
+      addToast("success", "Login successful");
+    }
+
+  } catch (error) {
+    console.error(error);
+    addToast("error", "Login failed");
+  }
+};
+
+const handleLogout = () => {
+  setIsAuthenticated(false);
+  setUserEmail('');
+  addToast("success", "Logged out");
+};
 
   return (
     <div className="min-h-screen text-white relative">
@@ -226,7 +268,7 @@ useEffect(() => {
                       <div className="w-8 h-8 rounded-full bg-red-500/20 animate-ping" />
                     </div>
                     <h3 className="text-2xl font-bold text-white mb-2">Backend Disconnected</h3>
-                    <p className="text-white/60 max-w-md">The FleetSight intelligence engine is currently offline. Please ensure the backend server is running on port 8000 to fetch real-time provider rates.</p>
+                    <p className="text-white/60 max-w-md">The FleetSight intelligence engine is currently offline. Please ensure the backend server is running. to fetch real-time provider rates.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

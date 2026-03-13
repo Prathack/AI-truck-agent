@@ -26,7 +26,7 @@ const App = () => {
 useEffect(() => {
   const checkBackend = async () => {
     try {
-      const res = await fetch(apiUrl("/health"));
+      const res = await fetch(apiUrl("health"));
 
       if (res.ok) {
         setBackendStatus("online");

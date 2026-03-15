@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, ChevronDown, Filter, Download } from 'lucide-react';
-import { motion } from 'framer-motion';
+
+const EmptyState = () => (
+  <div className="px-4 sm:px-6 py-16 sm:py-20 text-center">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center justify-center gap-3">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-2">
+        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500/20 animate-ping" />
+      </div>
+      <span className="text-white/80 font-bold text-base sm:text-lg">Backend Disconnected</span>
+      <span className="text-xs sm:text-sm text-white/40 max-w-xs sm:max-w-sm">
+        Connect to the FleetSight engine on port 8000 to view provider comparisons.
+      </span>
+    </motion.div>
+  </div>
+);
 
 const ComparisonTable = ({ providers }) => {
   const [expandedRow, setExpandedRow] = useState(null);
@@ -22,35 +37,20 @@ const ComparisonTable = ({ providers }) => {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   };
 
-  const EmptyState = () => (
-    <div className="px-4 sm:px-6 py-16 sm:py-20 text-center">
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center gap-3">
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-2">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500/20 animate-ping" />
-        </div>
-        <span className="text-white/80 font-bold text-base sm:text-lg">Backend Disconnected</span>
-        <span className="text-xs sm:text-sm text-white/40 max-w-xs sm:max-w-sm">
-          Connect to the FleetSight engine on port 8000 to view provider comparisons.
-        </span>
-      </motion.div>
-    </div>
-  );
-
   return (
     <div className="glass-panel rounded-xl sm:rounded-2xl border border-white/5 overflow-hidden">
       {/* Toolbar */}
       <div className="p-3 sm:p-4 border-b border-white/5 flex items-center justify-between bg-white/5 gap-2 flex-wrap">
         <div className="flex items-center gap-2 min-w-0">
-          <Filter className="w-4 h-4 text-white/40 flex-shrink-0" />
+          <Filter className="w-4 h-4 text-white/40 shrink-0" />
           <span className="text-xs sm:text-sm font-medium text-white/60 truncate">
             Filtered: <span className="text-white">All Providers</span>
           </span>
         </div>
         <button onClick={handleExportCSV}
-          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-white/60 hover:text-white transition-colors flex-shrink-0">
+          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-white/60 hover:text-white transition-colors shrink-0">
           <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-          <span className="hidden xs:inline">Export</span> CSV
+            <span className="hidden sm:inline">Export</span> CSV
         </button>
       </div>
 
@@ -82,10 +82,10 @@ const ComparisonTable = ({ providers }) => {
                   </td>
                   <td className="px-4 lg:px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs font-bold text-white/40 group-hover:bg-electric-500/20 group-hover:text-electric-400 transition-colors flex-shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs font-bold text-white/40 group-hover:bg-electric-500/20 group-hover:text-electric-400 transition-colors shrink-0">
                         {p.name.charAt(0)}
                       </div>
-                      <span className="font-semibold text-white/80 group-hover:text-white transition-colors truncate max-w-[140px]">{p.name}</span>
+                      <span className="font-semibold text-white/80 group-hover:text-white transition-colors truncate max-w-35">{p.name}</span>
                     </div>
                   </td>
                   <td className="px-4 lg:px-6 py-4 font-mono font-bold text-white">{p.totalPrice}</td>
@@ -98,7 +98,7 @@ const ComparisonTable = ({ providers }) => {
                   </td>
                   <td className="px-4 lg:px-6 py-4 text-neon-green font-mono font-bold">{p.rating}.0</td>
                   <td className="px-4 lg:px-6 py-4">
-                    <div className="w-full max-w-[80px] h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                    <div className="w-full max-w-20 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${p.confidence}%` }}
                         className={`h-full ${p.confidence > 90 ? 'bg-neon-green' : 'bg-electric-400'}`} />
                     </div>
@@ -130,10 +130,10 @@ const ComparisonTable = ({ providers }) => {
                 className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/5 transition-colors text-left"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className={`text-xs font-mono font-bold w-5 flex-shrink-0 ${i === 0 ? 'text-neon-green' : 'text-white/30'}`}>
+                  <span className={`text-xs font-mono font-bold w-5 shrink-0 ${i === 0 ? 'text-neon-green' : 'text-white/30'}`}>
                     {i + 1}
                   </span>
-                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm font-bold text-white/50 flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm font-bold text-white/50 shrink-0">
                     {p.name.charAt(0)}
                   </div>
                   <div className="min-w-0">
@@ -141,7 +141,7 @@ const ComparisonTable = ({ providers }) => {
                     <div className="text-[10px] text-white/40 uppercase tracking-wider">{p.category}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                <div className="flex items-center gap-3 shrink-0 ml-2">
                   <span className="font-mono font-bold text-white text-sm">{p.totalPrice}</span>
                   <ChevronDown className={`w-4 h-4 text-white/30 transition-transform ${expandedRow === i ? 'rotate-180' : ''}`} />
                 </div>

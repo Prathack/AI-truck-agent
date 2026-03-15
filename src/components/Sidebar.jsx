@@ -37,7 +37,7 @@ const Sidebar = ({ onSearch }) => {
           DESKTOP — fixed left panel (md+)
           Unchanged — always visible
       ══════════════════════════════════════════ */}
-      <aside className="hidden md:flex w-[300px] lg:w-[340px] h-[calc(100vh-80px)] overflow-y-auto border-r border-white/5 bg-black/20 backdrop-blur-md p-6 flex-col gap-8 custom-scrollbar flex-shrink-0">
+      <aside className="hidden md:flex w-[300px] lg:w-[340px] md:h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] overflow-y-auto border-r border-white/5 bg-black/20 backdrop-blur-md p-6 flex-col gap-8 custom-scrollbar flex-shrink-0">
         <SidebarContent
           providers={providers}
           stats={stats}

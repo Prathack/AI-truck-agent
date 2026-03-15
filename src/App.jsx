@@ -9,7 +9,7 @@ import ActivityLog from './components/ActivityLog';
 import SettingsView from './components/SettingsView';
 import LandingPage from './components/LandingPage';
 import Toast from './components/Toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Search, Loader2 } from 'lucide-react';
 
 const App = () => {
@@ -20,30 +20,29 @@ const App = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [backendStatus, setBackendStatus] = useState('checking'); // checking, online, offline
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   
-useEffect(() => {
-  const checkBackend = async () => {
-    try {
-      const res = await fetch(apiUrl("health"));
+  useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const res = await fetch(apiUrl("health"));
 
-      if (res.ok) {
-        setBackendStatus("online");
-      } else {
+        if (res.ok) {
+          setBackendStatus("online");
+        } else {
+          setBackendStatus("offline");
+        }
+      } catch (err) {
+        console.error("Backend error:", err);
         setBackendStatus("offline");
       }
-    } catch (err) {
-      console.error("Backend error:", err);
-      setBackendStatus("offline");
-    }
-  };
+    };
 
-  checkBackend();
-  const interval = setInterval(checkBackend, 10000);
+    checkBackend();
+    const interval = setInterval(checkBackend, 10000);
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, [apiUrl]);
 
   const generateMockProviders = () => {
     const baseProviders = [
@@ -89,6 +88,7 @@ useEffect(() => {
   const allProviders = generateMockProviders();
   const providers = backendStatus === 'online' ? allProviders : [];
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const generateDynamicLogs = () => {
     if (backendStatus !== 'online') {
       return [{ id: 1, timestamp: new Date().toLocaleTimeString('en-US', {hour12: false}), level: 'error', message: 'Connection to backend failed. Engine cluster unreachable.' }];
@@ -126,7 +126,7 @@ useEffect(() => {
   
   useEffect(() => {
     setLogs(generateDynamicLogs());
-  }, [backendStatus]);
+  }, [backendStatus, generateDynamicLogs]);
 
   const addToast = (type, message) => {
     const id = Date.now();
@@ -171,36 +171,7 @@ useEffect(() => {
   setIsSearching(false);
 };
 
-const handleLogin = async (email) => {
-  try {
-
-    const res = await fetch(
-      apiUrl("/api/auth"),
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      }
-    );
-
-    const data = await res.json();
-
-    if (data.status === "success") {
-      setUserEmail(email);
-      setIsAuthenticated(true);
-      addToast("success", "Login successful");
-    }
-
-  } catch (error) {
-    console.error(error);
-    addToast("error", "Login failed");
-  }
-};
-
 const handleLogout = () => {
-  setIsAuthenticated(false);
   setUserEmail('');
   addToast("success", "Logged out");
 };
@@ -210,10 +181,10 @@ const handleLogout = () => {
       <ParticleBackground />
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} backendStatus={backendStatus} />
       
-      <main className="flex">
+      <main className="flex flex-col md:flex-row pb-20 md:pb-0">
         <Sidebar onSearch={handleSearch} />
         
-        <div className="flex-1 p-8 h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
+        <div className="flex-1 p-4 md:p-8 min-h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
           {/* Progress Banner */}
           <AnimatePresence>
             {isSearching && (
@@ -254,11 +225,8 @@ const handleLogout = () => {
           </AnimatePresence>
 
           {/* Tab Content */}
-          <motion.div
+          <div
             key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
           >
             {activeTab === 'overview' && (
               <div className="h-full">
@@ -295,7 +263,7 @@ const handleLogout = () => {
             {activeTab === 'settings' && (
               <SettingsView userEmail={userEmail} onLogout={handleLogout} />
             )}
-          </motion.div>
+          </div>
         </div>
       </main>
 

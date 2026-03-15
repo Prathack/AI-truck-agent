@@ -19,7 +19,7 @@ const Sidebar = ({ onSearch }) => {
   ];
 
   return (
-    <aside className="w-[340px] h-[calc(100vh-80px)] overflow-y-auto border-r border-white/5 bg-black/20 backdrop-blur-md p-6 flex flex-col gap-8 custom-scrollbar">
+    <aside className="w-80 md:w-[340px] h-[calc(100vh-80px)] overflow-y-auto border-r border-white/5 bg-black/20 backdrop-blur-md p-4 md:p-6 flex flex-col gap-8 custom-scrollbar">
       {/* Route Search Form */}
       <div className="space-y-4">
         <h3 className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-4">Route Configuration</h3>
@@ -79,7 +79,7 @@ const Sidebar = ({ onSearch }) => {
       {/* Session Stats */}
       <div className="space-y-4">
         <h3 className="text-xs font-semibold uppercase tracking-widest text-white/40">Session Metrics</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {stats.map((stat, i) => (
             <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col gap-1">
               <div className="flex items-center justify-between mb-1">

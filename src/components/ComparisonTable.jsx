@@ -95,12 +95,12 @@ const ComparisonTable = ({ providers }) => {
                 transition={{ delay: i * 0.05 }}
                 className="group hover:bg-white/5 transition-colors cursor-pointer"
               >
-                <td className="px-6 py-4">
+                <td className="px-4 py-3 sm:px-6 sm:py-4">
                   <span className={`font-mono font-bold ${i === 0 ? 'text-neon-green' : 'text-white/40'}`}>
                     {i + 1}
                   </span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-3 sm:px-6 sm:py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs font-bold text-white/40 group-hover:bg-electric-500/20 group-hover:text-electric-400 transition-colors">
                       {p.name.charAt(0)}
@@ -108,20 +108,20 @@ const ComparisonTable = ({ providers }) => {
                     <span className="font-semibold text-white/80 group-hover:text-white transition-colors">{p.name}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 font-mono font-bold text-white">{p.totalPrice}</td>
-                <td className="px-6 py-4 font-mono text-white/60">{p.dailyRate}</td>
-                <td className="px-6 py-4 font-mono text-white/60">{p.mileageCost}</td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-3 sm:px-6 sm:py-4 font-mono font-bold text-white">{p.totalPrice}</td>
+                <td className="px-4 py-3 sm:px-6 sm:py-4 font-mono text-white/60">{p.dailyRate}</td>
+                <td className="px-4 py-3 sm:px-6 sm:py-4 font-mono text-white/60">{p.mileageCost}</td>
+                <td className="px-4 py-3 sm:px-6 sm:py-4">
                   <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/5 text-[10px] uppercase font-semibold text-white/50">
                     Box Truck
                   </span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-3 sm:px-6 sm:py-4">
                   <div className="flex items-center gap-1.5 text-neon-green font-mono font-bold">
                     {p.rating}.0
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-3 sm:px-6 sm:py-4">
                   <div className="w-full max-w-[100px] h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
                     <motion.div 
                       initial={{ width: 0 }}
@@ -130,7 +130,7 @@ const ComparisonTable = ({ providers }) => {
                     />
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-3 sm:px-6 sm:py-4">
                   <a href={p.url || '#'} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-electric-500/10 hover:bg-electric-500/20 text-electric-400 opacity-0 group-hover:opacity-100 transition-all inline-block hover:scale-110">
                     <ArrowUpRight className="w-4 h-4" />
                   </a>

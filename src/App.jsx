@@ -22,6 +22,19 @@ const App = () => {
   const [backendStatus, setBackendStatus] = useState('checking'); // checking, online, offline
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleSetActiveTab = (tab) => {
+    setActiveTab(tab);
+    setIsSidebarOpen(false);
+  };
+
+  const handleToggleSettings = () => {
+    setActiveTab((prev) => (prev === 'settings' ? 'overview' : 'settings'));
+    setIsSidebarOpen(false);
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
   
 useEffect(() => {
   const checkBackend = async () => {
@@ -208,12 +221,32 @@ const handleLogout = () => {
   return (
     <div className="min-h-screen text-white relative">
       <ParticleBackground />
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} backendStatus={backendStatus} />
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={handleSetActiveTab}
+        backendStatus={backendStatus}
+        onToggleSidebar={toggleSidebar}
+        isSidebarOpen={isSidebarOpen}
+        onToggleSettings={handleToggleSettings}
+      />
       
-      <main className="flex">
-        <Sidebar onSearch={handleSearch} />
-        
-        <div className="flex-1 p-8 h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
+      <main className="flex flex-col md:flex-row">
+        {/* Mobile sidebar drawer */}
+        {isSidebarOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <div className="absolute inset-0 bg-black/60" onClick={() => setIsSidebarOpen(false)} />
+            <div className="relative w-80 h-full">
+              <Sidebar onSearch={handleSearch} />
+            </div>
+          </div>
+        )}
+
+        {/* Desktop sidebar */}
+        <div className="hidden md:block">
+          <Sidebar onSearch={handleSearch} />
+        </div>
+
+        <div className="flex-1 p-4 sm:p-6 md:p-8 h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
           {/* Progress Banner */}
           <AnimatePresence>
             {isSearching && (
@@ -240,7 +273,7 @@ const handleLogout = () => {
                 </div>
                 <div className="text-right relative z-10">
                   <span className="text-xs font-mono font-bold text-electric-400">14 / 25 COMPLETED</span>
-                  <div className="w-48 h-1.5 bg-white/5 rounded-full mt-2 overflow-hidden border border-white/5">
+                  <div className="w-32 sm:w-48 h-1.5 bg-white/5 rounded-full mt-2 overflow-hidden border border-white/5">
                     <motion.div 
                       className="h-full bg-electric-500"
                       initial={{ width: '0%' }}

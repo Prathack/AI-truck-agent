@@ -43,7 +43,7 @@ const PriceCard = ({ provider, isBestPrice, index = 0 }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         <div className="bg-black/20 p-3 rounded-xl border border-white/5 min-w-0 flex flex-col justify-center">
           <span className="text-[10px] text-white/40 uppercase font-semibold block truncate" title="Total Price">Total Price</span>
           <div className="flex items-baseline gap-1 min-w-0 mt-0.5">

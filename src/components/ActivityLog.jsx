@@ -13,7 +13,7 @@ const ActivityLog = ({ logs }) => {
   };
 
   return (
-    <div className="glass-panel rounded-3xl border border-white/5 overflow-hidden flex flex-col h-[600px]">
+    <div className="glass-panel rounded-3xl border border-white/5 overflow-hidden flex flex-col h-[min(60vh,600px)] md:h-[600px]">
       <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-white/30" />

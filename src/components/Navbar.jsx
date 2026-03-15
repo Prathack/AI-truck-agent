@@ -1,8 +1,8 @@
 import React from 'react';
-import { Truck, Activity, Box, Eye, Settings, Terminal, Zap } from 'lucide-react';
+import { Truck, Activity, Box, Eye, Settings, Terminal, Zap, Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const Navbar = ({ activeTab, setActiveTab, backendStatus = 'online' }) => {
+const Navbar = ({ activeTab, setActiveTab, backendStatus = 'online', onToggleSidebar, isSidebarOpen, onToggleSettings }) => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Box },
     { id: 'comparison', label: 'Full Comparison', icon: Zap },
@@ -11,8 +11,17 @@ const Navbar = ({ activeTab, setActiveTab, backendStatus = 'online' }) => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 glass-panel border-b border-white/5 py-4 px-8 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 glass-panel border-b border-white/5 py-4 px-4 sm:px-6 md:px-8 flex items-center justify-between">
       <div className="flex items-center gap-4">
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+            aria-label="Toggle sidebar"
+          >
+            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        )}
         <div className="bg-electric-500/20 p-2 rounded-xl border border-electric-500/30">
           <Truck className="w-6 h-6 text-electric-400" />
         </div>
@@ -24,7 +33,7 @@ const Navbar = ({ activeTab, setActiveTab, backendStatus = 'online' }) => {
         </div>
       </div>
 
-      <div className="hidden md:flex items-center bg-white/5 rounded-full p-1 border border-white/5">
+      <div className="hidden sm:flex items-center bg-white/5 rounded-full p-1 border border-white/5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -62,7 +71,7 @@ const Navbar = ({ activeTab, setActiveTab, backendStatus = 'online' }) => {
           </span>
         </div>
         <button 
-          onClick={() => setActiveTab('settings')}
+          onClick={onToggleSettings}
           className={`transition-colors ${activeTab === 'settings' ? 'text-electric-400' : 'text-white/50 hover:text-white'}`}
         >
           <Settings className="w-5 h-5" />

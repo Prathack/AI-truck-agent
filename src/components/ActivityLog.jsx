@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Info, CheckCircle, AlertTriangle, AlertCircle, Clock } from 'lucide-react';
 
 const ActivityLog = ({ logs }) => {
@@ -33,7 +33,7 @@ const ActivityLog = ({ logs }) => {
   </div>
 
   {/* Log stream */}
-  <div className="flex-1 overflow-y-auto px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 space-y-1.5 sm:space-y-2 custom-scrollbar bg-black/40">
+  <div className="flex-1 overflow-y-auto px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 space-y-1.5 sm:space-y-2 custom-scrollbar bg-black/40 scrollable-container">
     <AnimatePresence initial={false}>
       {logs.length === 0 ? (
         <motion.div

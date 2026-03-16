@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ParticleBackground from './components/ParticleBackground';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -9,31 +9,57 @@ import ActivityLog from './components/ActivityLog';
 import SettingsView from './components/SettingsView';
 import LandingPage from './components/LandingPage';
 import Toast from './components/Toast';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Search, Loader2 } from 'lucide-react';
 
 const App = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
   const apiUrl = (path) => (API_BASE_URL ? `${API_BASE_URL}${path}` : path);
 
+  // Debug: log the API configuration
+  useEffect(() => {
+    console.log("Frontend API Configuration:", {
+      VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+      resolvedBaseUrl: API_BASE_URL,
+      healthCheckUrl: apiUrl("/health")
+    });
+  }, [API_BASE_URL]);
+
   const [activeTab, setActiveTab] = useState('overview');
   const [isSearching, setIsSearching] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [backendStatus, setBackendStatus] = useState('checking'); // checking, online, offline
   const [userEmail, setUserEmail] = useState('');
+  const [currentJobId, setCurrentJobId] = useState(null);
+  const [realProviders, setRealProviders] = useState([]);
+  const [realLogs, setRealLogs] = useState([]);
+  
+  const addToast = (type, message) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, type, message }]);
+    setTimeout(() => removeToast(id), 5000);
+  };
+
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
   
   useEffect(() => {
     const checkBackend = async () => {
       try {
-        const res = await fetch(apiUrl("health"));
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        const res = await Promise.race([fetch(apiUrl("/health")), timeout]);
 
         if (res.ok) {
           setBackendStatus("online");
         } else {
+          console.warn("Backend health check returned:", res.status);
           setBackendStatus("offline");
         }
       } catch (err) {
-        console.error("Backend error:", err);
+        console.error("Backend health check failed:", err.message, "URL:", apiUrl("/health"));
         setBackendStatus("offline");
       }
     };
@@ -44,7 +70,8 @@ const App = () => {
     return () => clearInterval(interval);
   }, [apiUrl]);
 
-  const generateMockProviders = () => {
+  // Memoize mock providers so they only generate once and don't change on re-render
+  const allProviders = useMemo(() => {
     const baseProviders = [
       { name: 'National Truck Rental', category: 'National', url: 'https://nationaltruckrental.com' },
       { name: 'Enterprise Fleet', category: 'National', url: 'https://enterprisetrucks.com' },
@@ -83,13 +110,12 @@ const App = () => {
     
     // Sort by total price
     return results.sort((a, b) => parseFloat(a.totalPrice.slice(1)) - parseFloat(b.totalPrice.slice(1)));
-  };
-
-  const allProviders = generateMockProviders();
-  const providers = backendStatus === 'online' ? allProviders : [];
+  }, []);
   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const generateDynamicLogs = () => {
+  const providers = realProviders.length > 0 ? realProviders : (backendStatus === 'online' ? allProviders : []);
+  
+  // Memoize log generation function to prevent unnecessary regeneration
+  const generateDynamicLogs = useCallback(() => {
     if (backendStatus !== 'online') {
       return [{ id: 1, timestamp: new Date().toLocaleTimeString('en-US', {hour12: false}), level: 'error', message: 'Connection to backend failed. Engine cluster unreachable.' }];
     }
@@ -120,27 +146,80 @@ const App = () => {
     l.push({ id: id++, timestamp: time.toLocaleTimeString('en-US', {hour12: false}), level: 'success', message: `Job complete. Optimized ${allProviders.length} competitive routes.` });
 
     return l.reverse();
-  };
+  }, [allProviders]);
 
   const [logs, setLogs] = useState([]);
   
   useEffect(() => {
-    setLogs(generateDynamicLogs());
-  }, [backendStatus, generateDynamicLogs]);
+    if (realLogs.length > 0) {
+      setLogs(realLogs);
+    } else {
+      setLogs(generateDynamicLogs());
+    }
+  }, [backendStatus, realLogs, generateDynamicLogs]);
 
-  const addToast = (type, message) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, type, message }]);
-    setTimeout(() => removeToast(id), 5000);
-  };
+  // Poll for job results
+  useEffect(() => {
+    if (!currentJobId) return;
 
-  const removeToast = (id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+    const pollResults = async () => {
+      try {
+        // Fetch results
+        const resultsResponse = await fetch(apiUrl(`/api/jobs/${currentJobId}/results`));
+        if (resultsResponse.ok) {
+          const data = await resultsResponse.json();
+          if (data.status === 'completed') {
+            // Transform results to match frontend format
+            const transformedProviders = data.results.map(result => ({
+              name: result.provider_name || result.name,
+              category: result.vehicle_class || 'Unknown',
+              totalPrice: result.total_price ? `$${result.total_price}` : 'N/A',
+              dailyRate: result.daily_rate ? `$${result.daily_rate}` : 'N/A',
+              mileageCost: result.mileage_fee ? `$${result.mileage_fee}` : 'N/A',
+              status: result.availability ? 'Available' : 'Unavailable',
+              rating: Math.floor(result.confidence_score * 5) || 4,
+              confidence: Math.floor(result.confidence_score * 100) || 85
+            }));
+            setRealProviders(transformedProviders);
+            setCurrentJobId(null); // Stop polling
+            setIsSearching(false);
+            addToast("success", `Search completed with ${transformedProviders.length} results`);
+          }
+        }
+
+        // Fetch job status for logs
+        const jobResponse = await fetch(apiUrl(`/api/jobs/${currentJobId}`));
+        if (jobResponse.ok) {
+          const jobData = await jobResponse.json();
+          // Transform agent logs
+          const transformedLogs = [];
+          let id = 1;
+          for (const [agentName, agentData] of Object.entries(jobData.agents || {})) {
+            agentData.logs.forEach(log => {
+              transformedLogs.push({
+                id: id++,
+                timestamp: new Date(log.time).toLocaleTimeString('en-US', {hour12: false}),
+                level: agentData.status === 'failed' ? 'error' : (agentData.status === 'completed' ? 'success' : 'info'),
+                message: log.message
+              });
+            });
+          }
+          setRealLogs(transformedLogs.reverse());
+        }
+      } catch (error) {
+        console.error('Error polling:', error);
+      }
+    };
+
+    const interval = setInterval(pollResults, 2000); // Poll every 2 seconds
+    return () => clearInterval(interval);
+  }, [currentJobId, apiUrl, addToast]);
 
   const handleSearch = async () => {
   try {
     setIsSearching(true);
+    setRealProviders([]); // Clear previous results
+    setRealLogs([]);
 
     const response = await fetch(
       apiUrl("/api/search"),
@@ -160,15 +239,15 @@ const App = () => {
     const data = await response.json();
 
     console.log("Job ID:", data.job_id);
+    setCurrentJobId(data.job_id);
 
     addToast("success", "Search started. Job ID: " + data.job_id);
 
   } catch (error) {
     console.error(error);
     addToast("error", "Backend request failed");
+    setIsSearching(false);
   }
-
-  setIsSearching(false);
 };
 
 const handleLogout = () => {
@@ -184,7 +263,7 @@ const handleLogout = () => {
       <main className="flex flex-col md:flex-row pb-20 md:pb-0">
         <Sidebar onSearch={handleSearch} />
         
-        <div className="flex-1 p-4 md:p-8 min-h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
+        <div className="flex-1 p-4 md:p-8 min-h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar scrollable-container">
           {/* Progress Banner */}
           <AnimatePresence>
             {isSearching && (

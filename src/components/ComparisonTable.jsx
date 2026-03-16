@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowUpRight, ChevronDown, Filter, Download } from 'lucide-react';
 
 const EmptyState = () => (
@@ -55,7 +55,7 @@ const ComparisonTable = ({ providers }) => {
       </div>
 
       {/* ── Desktop table (md+) ── */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden md:block overflow-x-auto scrollable-container">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-white/2">

@@ -5,7 +5,12 @@ import ParticleBackground from './ParticleBackground';
 
 const LandingPage = ({ onLogin }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
-  const apiUrl = (path) => (API_BASE_URL ? `${API_BASE_URL}${path}` : path);
+  const apiUrl = (path) => {
+    if (!API_BASE_URL) return path;
+    const base = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    const p = path.startsWith('/') ? path : `/${path}`;
+    return `${base}${p}`;
+  };
 
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
